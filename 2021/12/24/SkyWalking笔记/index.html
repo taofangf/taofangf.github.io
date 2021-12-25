@@ -1,0 +1,305 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SkyWalking笔记 | Jarvis</title><meta name="author" content="Jarvis"><meta name="copyright" content="Jarvis"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="以下说明基于SkyWalking v6.6.0在线演示地址  1 Agent-Core核心1.1关键抽象类AbstractClassEnhancePluginDefine插件模块 该抽象类将插件增强的方法进行了统一管理，结合接口ConstructorInterceptPoint、InstanceMethodsInterceptPoint、StaticMethodsInterceptPoint使">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SkyWalking笔记">
+<meta property="og:url" content="http://taofangf.github.io/2021/12/24/SkyWalking%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="Jarvis">
+<meta property="og:description" content="以下说明基于SkyWalking v6.6.0在线演示地址  1 Agent-Core核心1.1关键抽象类AbstractClassEnhancePluginDefine插件模块 该抽象类将插件增强的方法进行了统一管理，结合接口ConstructorInterceptPoint、InstanceMethodsInterceptPoint、StaticMethodsInterceptPoint使">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg">
+<meta property="article:published_time" content="2021-12-24T13:28:08.857Z">
+<meta property="article:modified_time" content="2021-12-25T13:34:45.770Z">
+<meta property="article:author" content="Jarvis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://taofangf.github.io/2021/12/24/SkyWalking%E7%AC%94%E8%AE%B0/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'SkyWalking笔记',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-12-25 21:34:45'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 5.4.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="/img/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">1</div></a></div></div></div><hr/></div></div><div class="post" id="body-wrap"><header class="not-top-img" id="page-header"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Jarvis</a></span><div id="menus"><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">SkyWalking笔记</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-12-24T13:28:08.857Z" title="发表于 2021-12-24 21:28:08">2021-12-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-12-25T13:34:45.770Z" title="更新于 2021-12-25 21:34:45">2021-12-25</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="SkyWalking笔记"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div><article class="post-content" id="article-container"><blockquote>
+<p> 以下说明基于SkyWalking v6.6.0<br><a target="_blank" rel="noopener" href="http://demo.skywalking.apache.org/">在线演示地址</a></p>
+</blockquote>
+<h2 id="1-Agent-Core核心"><a href="#1-Agent-Core核心" class="headerlink" title="1 Agent-Core核心"></a>1 Agent-Core核心</h2><h3 id="1-1关键抽象类AbstractClassEnhancePluginDefine插件模块"><a href="#1-1关键抽象类AbstractClassEnhancePluginDefine插件模块" class="headerlink" title="1.1关键抽象类AbstractClassEnhancePluginDefine插件模块"></a>1.1<strong>关键抽象类<code>AbstractClassEnhancePluginDefine</code>插件模块</strong></h3><blockquote>
+<p>该抽象类将插件增强的方法进行了统一管理，结合接口<code>ConstructorInterceptPoint</code>、<code>InstanceMethodsInterceptPoint</code>、<code>StaticMethodsInterceptPoint</code>使得自定义开发组件增强类变得简单。</p>
+</blockquote>
+<ul>
+<li><p><code>org.apache.skywalking.apm.agent.core.plugin.AbstractClassEnhancePluginDefine#define</code> 核心方法（插件增强入口）</p>
+</li>
+<li><p><code>org.apache.skywalking.apm.agent.core.plugin.AbstractClassEnhancePluginDefine#enhance</code>该抽象方法只有唯一实现<code>org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.ClassEnhancePluginDefine#enhance</code>，该实现会调用两个方法</p>
+<ul>
+<li><strong>增强静态方法</strong><code>org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.ClassEnhancePluginDefine#enhanceClass</code><ul>
+<li>找对应插件实现类静态方法的拦截器数组<code>StaticMethodsInterceptPoint</code>，并通过<code>byte-buddy</code>工具包实现字节码增强</li>
+</ul>
+</li>
+<li><strong>增强实例方法和构造器方法</strong><code>org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.ClassEnhancePluginDefine#enhanceInstance</code><ul>
+<li>找到对应插件的构造器<code>ConstructorInterceptPoint</code>,并通过<code>byte-buddy</code>工具包实现字节码增强</li>
+<li>找到对应插件的实例方法<code>instanceMethodsInterceptPoints</code>,并通过<code>byte-buddy</code>工具包实现字节码增强</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><code>org.apache.skywalking.apm.agent.core.plugin.AbstractClassEnhancePluginDefine#enhanceClass</code> 进行类匹配，参考SkyWalking提供的默认处理<code>ClassMatch</code></p>
+</li>
+<li><p><code>org.apache.skywalking.apm.agent.core.plugin.AbstractClassEnhancePluginDefine#witnessClasses</code> 为了处理一个插件有多个版本的问题</p>
+</li>
+<li><p><code>org.apache.skywalking.apm.agent.core.plugin.AbstractClassEnhancePluginDefine#isBootstrapInstrumentation</code></p>
+</li>
+<li><p><code>org.apache.skywalking.apm.agent.core.plugin.AbstractClassEnhancePluginDefine#getConstructorsInterceptPoints</code> 获取构造器增强插件数组</p>
+</li>
+<li><p><code>org.apache.skywalking.apm.agent.core.plugin.AbstractClassEnhancePluginDefine#getInstanceMethodsInterceptPoints</code> 获取实例方法增强插件数组</p>
+</li>
+<li><p><code>org.apache.skywalking.apm.agent.core.plugin.AbstractClassEnhancePluginDefine#getStaticMethodsInterceptPoints</code> 获取静态方法增强插件数组</p>
+</li>
+</ul>
+<h3 id="1-2-自定义增强插件"><a href="#1-2-自定义增强插件" class="headerlink" title="1.2 自定义增强插件"></a>1.2 <a target="_blank" rel="noopener" href="https://github.com/SkyAPM/document-cn-translation-of-skywalking/blob/master/docs/zh/master/setup/service-agent/java-agent/Customize-enhance-trace.md">自定义增强插件</a></h3><h4 id="1-2-1-实现对类的自定义增强需要2步。"><a href="#1-2-1-实现对类的自定义增强需要2步。" class="headerlink" title="1.2.1 实现对类的自定义增强需要2步。"></a>1.2.1 实现对类的自定义增强需要2步。</h4><blockquote>
+<ol>
+<li>激活插件，将插件从<code>optional-plugins/apm-customize-enhance-plugin.jar</code>移动到<code>plugin/apm-customize-enhance-plugin.jar</code>。</li>
+<li>在agent.config中配置<code>plugin.customize.enhance_file</code>，指明增强规则文件，比如<code>/absolute/path/to/customize_enhance.xml</code>。</li>
+<li>在<code>customize_enhance.xml</code>中配置增强规则。 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">enhanced</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">class</span> <span class="attr">class_name</span>=<span class="string">&quot;test.apache.skywalking.testcase.customize.service.TestService1&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">method</span> <span class="attr">method</span>=<span class="string">&quot;staticMethod()&quot;</span> <span class="attr">operation_name</span>=<span class="string">&quot;/is_static_method&quot;</span> <span class="attr">static</span>=<span class="string">&quot;true&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">method</span> <span class="attr">method</span>=<span class="string">&quot;staticMethod(java.lang.String,int.class,java.util.Map,java.util.List,[Ljava.lang.Object;)&quot;</span> <span class="attr">operation_name</span>=<span class="string">&quot;/is_static_method_args&quot;</span> <span class="attr">static</span>=<span class="string">&quot;true&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">operation_name_suffix</span>&gt;</span>arg[0]<span class="tag">&lt;/<span class="name">operation_name_suffix</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">operation_name_suffix</span>&gt;</span>arg[1]<span class="tag">&lt;/<span class="name">operation_name_suffix</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">operation_name_suffix</span>&gt;</span>arg[3].[0]<span class="tag">&lt;/<span class="name">operation_name_suffix</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">tag</span> <span class="attr">key</span>=<span class="string">&quot;tag_1&quot;</span>&gt;</span>arg[2].[&#x27;k1&#x27;]<span class="tag">&lt;/<span class="name">tag</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">tag</span> <span class="attr">key</span>=<span class="string">&quot;tag_2&quot;</span>&gt;</span>arg[4].[1]<span class="tag">&lt;/<span class="name">tag</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">log</span> <span class="attr">key</span>=<span class="string">&quot;log_1&quot;</span>&gt;</span>arg[4].[2]<span class="tag">&lt;/<span class="name">log</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">method</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">method</span> <span class="attr">method</span>=<span class="string">&quot;method()&quot;</span> <span class="attr">static</span>=<span class="string">&quot;false&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">method</span> <span class="attr">method</span>=<span class="string">&quot;method(java.lang.String,int.class)&quot;</span> <span class="attr">operation_name</span>=<span class="string">&quot;/method_2&quot;</span> <span class="attr">static</span>=<span class="string">&quot;false&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">operation_name_suffix</span>&gt;</span>arg[0]<span class="tag">&lt;/<span class="name">operation_name_suffix</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">tag</span> <span class="attr">key</span>=<span class="string">&quot;tag_1&quot;</span>&gt;</span>arg[0]<span class="tag">&lt;/<span class="name">tag</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">log</span> <span class="attr">key</span>=<span class="string">&quot;log_1&quot;</span>&gt;</span>arg[1]<span class="tag">&lt;/<span class="name">log</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">method</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">method</span> <span class="attr">method</span>=<span class="string">&quot;method(test.apache.skywalking.testcase.customize.model.Model0,java.lang.String,int.class)&quot;</span> <span class="attr">operation_name</span>=<span class="string">&quot;/method_3&quot;</span> <span class="attr">static</span>=<span class="string">&quot;false&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">operation_name_suffix</span>&gt;</span>arg[0].id<span class="tag">&lt;/<span class="name">operation_name_suffix</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">operation_name_suffix</span>&gt;</span>arg[0].model1.name<span class="tag">&lt;/<span class="name">operation_name_suffix</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">operation_name_suffix</span>&gt;</span>arg[0].model1.getId()<span class="tag">&lt;/<span class="name">operation_name_suffix</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">tag</span> <span class="attr">key</span>=<span class="string">&quot;tag_os&quot;</span>&gt;</span>arg[0].os.[1]<span class="tag">&lt;/<span class="name">tag</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">log</span> <span class="attr">key</span>=<span class="string">&quot;log_map&quot;</span>&gt;</span>arg[0].getM().[&#x27;k1&#x27;]<span class="tag">&lt;/<span class="name">log</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">method</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">class</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">class</span> <span class="attr">class_name</span>=<span class="string">&quot;test.apache.skywalking.testcase.customize.service.TestService2&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">method</span> <span class="attr">method</span>=<span class="string">&quot;staticMethod(java.lang.String,int.class)&quot;</span> <span class="attr">operation_name</span>=<span class="string">&quot;/is_2_static_method&quot;</span> <span class="attr">static</span>=<span class="string">&quot;true&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">tag</span> <span class="attr">key</span>=<span class="string">&quot;tag_2_1&quot;</span>&gt;</span>arg[0]<span class="tag">&lt;/<span class="name">tag</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">log</span> <span class="attr">key</span>=<span class="string">&quot;log_1_1&quot;</span>&gt;</span>arg[1]<span class="tag">&lt;/<span class="name">log</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">method</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">method</span> <span class="attr">method</span>=<span class="string">&quot;method([Ljava.lang.Object;)&quot;</span> <span class="attr">operation_name</span>=<span class="string">&quot;/method_4&quot;</span> <span class="attr">static</span>=<span class="string">&quot;false&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">tag</span> <span class="attr">key</span>=<span class="string">&quot;tag_4_1&quot;</span>&gt;</span>arg[0].[0]<span class="tag">&lt;/<span class="name">tag</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">method</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">method</span> <span class="attr">method</span>=<span class="string">&quot;method(java.util.List,int.class)&quot;</span> <span class="attr">operation_name</span>=<span class="string">&quot;/method_5&quot;</span> <span class="attr">static</span>=<span class="string">&quot;false&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">tag</span> <span class="attr">key</span>=<span class="string">&quot;tag_5_1&quot;</span>&gt;</span>arg[0].[0]<span class="tag">&lt;/<span class="name">tag</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">log</span> <span class="attr">key</span>=<span class="string">&quot;log_5_1&quot;</span>&gt;</span>arg[1]<span class="tag">&lt;/<span class="name">log</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">method</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">class</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">enhanced</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<ul>
+<li><p>文件中的配置说明。</p>
+<table>
+<thead>
+<tr>
+<th align="left">配置</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">class_name</td>
+<td align="left">要被增强的类</td>
+</tr>
+<tr>
+<td align="left">method</td>
+<td align="left">类的拦截器方法</td>
+</tr>
+<tr>
+<td align="left">operation_name</td>
+<td align="left">如果进行了配置，将用它替代默认的operation_name</td>
+</tr>
+<tr>
+<td align="left">operation_name_suffix</td>
+<td align="left">表示在operation_name后添加动态数据</td>
+</tr>
+<tr>
+<td align="left">static</td>
+<td align="left">方法是否为静态方法</td>
+</tr>
+<tr>
+<td align="left">tag</td>
+<td align="left">将在local span中添加一个tag。key的值需要在XML节点上表示。</td>
+</tr>
+<tr>
+<td align="left">log</td>
+<td align="left">将在local span中添加一个log。key的值需要在XML节点上表示。</td>
+</tr>
+<tr>
+<td align="left">arg[x]</td>
+<td align="left">表示输入的参数值。比如args[0]表示第一个参数。</td>
+</tr>
+<tr>
+<td align="left">.[x]</td>
+<td align="left">当正在被解析的对象是Array或List，你可以用这个表达式得到对应index上的对象。</td>
+</tr>
+<tr>
+<td align="left">.[‘key’]</td>
+<td align="left">当正在被解析的对象是Map, 你可以用这个表达式得到map的key。</td>
+</tr>
+</tbody></table>
+</li>
+</ul>
+</blockquote>
+<h4 id="1-2-2-源码实现"><a href="#1-2-2-源码实现" class="headerlink" title="1.2.2 源码实现"></a>1.2.2 源码实现</h4><h5 id="1-2-2-1自定义插件的加载方式"><a href="#1-2-2-1自定义插件的加载方式" class="headerlink" title="1.2.2.1自定义插件的加载方式"></a>1.2.2.1自定义插件的加载方式</h5><ul>
+<li>入口<code>org.apache.skywalking.apm.agent.core.plugin.PluginBootstrap#loadPlugins</code></li>
+<li>动态加载插件<code>org.apache.skywalking.apm.agent.core.plugin.DynamicPluginLoader#load</code><ul>
+<li>通过<code>ServiceLoader</code>的方式加载<code>org.apache.skywalking.apm.agent.core.plugin.loader.InstrumentationLoader</code>的实现类即<code>org.apache.skywalking.apm.plugin.customize.loader.CustomizeInstrumentationLoader</code>将通过<code>customize_enhance.xml</code>配置的自定义增强类、方法通过Class.forNama实例化成插件对象<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (String enhanceClass : enhanceClasses) &#123;</span><br><span class="line">    String[] classDesc = CustomizeUtil.getClassDesc(enhanceClass);</span><br><span class="line">    AbstractClassEnhancePluginDefine plugin = (AbstractClassEnhancePluginDefine) Class.forName(</span><br><span class="line">        Boolean.valueOf(classDesc[<span class="number">1</span>]) ? CustomizeStaticInstrumentation.class.getName() : CustomizeInstanceInstrumentation.class.getName(),</span><br><span class="line">        <span class="keyword">true</span>, classLoader).getConstructor(String.class).newInstance(classDesc[<span class="number">0</span>]);</span><br><span class="line">    instrumentations.add(plugin);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+</ul>
+<h5 id="1-2-2-2自定义插件类增强方式"><a href="#1-2-2-2自定义插件类增强方式" class="headerlink" title="1.2.2.2自定义插件类增强方式"></a>1.2.2.2自定义插件类增强方式</h5><ul>
+<li>自定义实例方法增强<code>org.apache.skywalking.apm.plugin.customize.define.CustomizeInstanceInstrumentation</code><ul>
+<li>拦截器类<code>org.apache.skywalking.apm.plugin.customize.interceptor.CustomizeStaticInterceptor</code> </li>
+</ul>
+</li>
+<li>自定义静态方法增强<code>org.apache.skywalking.apm.plugin.customize.interceptor.CustomizeInstanceInterceptor</code><ul>
+<li>拦截器类<code>org.apache.skywalking.apm.plugin.customize.define.CustomizeStaticInstrumentation</code> </li>
+</ul>
+</li>
+<li>自定义拦截器基类<code>org.apache.skywalking.apm.plugin.customize.interceptor.BaseInterceptorMethods</code>提供默认创建<strong>LocalSpan</strong>、<strong>Tag</strong>、<strong>Log</strong></li>
+</ul>
+<h3 id="1-3-AbstractTracerContext上下文管理接口"><a href="#1-3-AbstractTracerContext上下文管理接口" class="headerlink" title="1.3 AbstractTracerContext上下文管理接口"></a>1.3 <code>AbstractTracerContext</code>上下文管理接口</h3><h4 id="1-3-1-重点实现类org-apache-skywalking-apm-agent-core-context-TracingContext"><a href="#1-3-1-重点实现类org-apache-skywalking-apm-agent-core-context-TracingContext" class="headerlink" title="1.3.1 重点实现类org.apache.skywalking.apm.agent.core.context.TracingContext"></a>1.3.1 重点实现类<code>org.apache.skywalking.apm.agent.core.context.TracingContext</code></h4><h4 id="1-3-2-实现类org-apache-skywalking-apm-agent-core-context-IgnoredTracerContext"><a href="#1-3-2-实现类org-apache-skywalking-apm-agent-core-context-IgnoredTracerContext" class="headerlink" title="1.3.2 实现类org.apache.skywalking.apm.agent.core.context.IgnoredTracerContext"></a>1.3.2 实现类<code>org.apache.skywalking.apm.agent.core.context.IgnoredTracerContext</code></h4><h2 id="2-Collector-观测分析平台-Observability-Analysis-Platform-OAP"><a href="#2-Collector-观测分析平台-Observability-Analysis-Platform-OAP" class="headerlink" title="2 Collector 观测分析平台(Observability Analysis Platform, OAP)"></a>2 Collector 观测分析平台(Observability Analysis Platform, OAP)</h2><h3 id="2-1-OAP的启动及初始化流程"><a href="#2-1-OAP的启动及初始化流程" class="headerlink" title="2.1 OAP的启动及初始化流程"></a>2.1 OAP的启动及初始化流程</h3><blockquote>
+<p>启动入口：<code>org.apache.skywalking.oap.server.starter.OAPServerBootstrap#start</code></p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">ApplicationConfigLoader configLoader = <span class="keyword">new</span> ApplicationConfigLoader();</span><br><span class="line">ModuleManager manager = <span class="keyword">new</span> ModuleManager();</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="comment">// 1.读取并加载application.yml中的配置信息</span></span><br><span class="line">    <span class="comment">// 2.获取到的当前系统环境进行配置覆盖（主要是本地JDK信息，电脑信息等）</span></span><br><span class="line">    ApplicationConfiguration applicationConfiguration = configLoader.load();</span><br><span class="line">    <span class="comment">// 1.通过JDK的ServiceLoader机制（SPI）获取`META-INF.services`下的内容，见2.1.1 补充信息</span></span><br><span class="line">    <span class="comment">// 2.通过名称equals后进行newInstance实例化对象，见2.1.2详细说明</span></span><br><span class="line">    manager.init(applicationConfiguration);</span><br><span class="line">&#125; <span class="keyword">catch</span> (Throwable t) &#123;</span><br><span class="line">    logger.error(t.getMessage(), t);</span><br><span class="line">    System.exit(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-1-1-补充信息-包含但不限于以下基本实现，还有自定义拓展组件"><a href="#2-1-1-补充信息-包含但不限于以下基本实现，还有自定义拓展组件" class="headerlink" title="2.1.1 补充信息(包含但不限于以下基本实现，还有自定义拓展组件)"></a>2.1.1 补充信息(包含但不限于以下基本实现，还有自定义拓展组件)</h4><blockquote>
+<ul>
+<li><p><code>org.apache.skywalking.oap.server.library.module.ModuleDefine</code>  </p>
+<blockquote>
+<p>org.apache.skywalking.oap.server.core.storage.StorageModule<br>org.apache.skywalking.oap.server.core.cluster.ClusterModule<br>org.apache.skywalking.oap.server.core.CoreModule<br>org.apache.skywalking.oap.server.core.query.QueryModule<br>org.apache.skywalking.oap.server.core.alarm.AlarmModule<br>org.apache.skywalking.oap.server.core.exporter.ExporterModule  </p>
+</blockquote>
+</li>
+<li><p><code>org.apache.skywalking.oap.server.library.module.ModuleProvider</code>  </p>
+<blockquote>
+<p>org.apache.skywalking.oap.server.core.CoreModuleProvider</p>
+</blockquote>
+</li>
+</ul>
+</blockquote>
+<h4 id="2-1-2-组件管理ModuleManager"><a href="#2-1-2-组件管理ModuleManager" class="headerlink" title="2.1.2 组件管理ModuleManager"></a>2.1.2 组件管理<code>ModuleManager</code></h4><p><code>org.apache.skywalking.oap.server.library.module.ModuleManager#init</code>初始化指定组件</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">String[] moduleNames = applicationConfiguration.moduleList();</span><br><span class="line"><span class="comment">// 通过ServiceLoader在META-INF/services/org.apache.skywalking.oap.server.library.module.ModuleDefine文件中加载外置的ModuleDefine组件</span></span><br><span class="line"><span class="comment">// 大多数的实现类均继承抽象类org.apache.skywalking.oap.server.library.module.ModuleDefine</span></span><br><span class="line">ServiceLoader&lt;ModuleDefine&gt; moduleServiceLoader = ServiceLoader.load(ModuleDefine.class);</span><br><span class="line"><span class="comment">// 通过ServiceLoader在META-INF/services/org.apache.skywalking.oap.server.library.module.ModuleProvider文件中加载外置的ModuleProvider组件</span></span><br><span class="line"><span class="comment">// 大多数的实现类均继承抽象类org.apache.skywalking.oap.server.library.module.ModuleProvider</span></span><br><span class="line">ServiceLoader&lt;ModuleProvider&gt; moduleProviderLoader = ServiceLoader.load(ModuleProvider.class);</span><br><span class="line"></span><br><span class="line">LinkedList&lt;String&gt; moduleList = <span class="keyword">new</span> LinkedList&lt;&gt;(Arrays.asList(moduleNames));</span><br><span class="line"><span class="keyword">for</span> (ModuleDefine <span class="keyword">module</span> : moduleServiceLoader) &#123;</span><br><span class="line">    <span class="keyword">for</span> (String moduleName : moduleNames) &#123;</span><br><span class="line">        <span class="keyword">if</span> (moduleName.equals(<span class="keyword">module</span>.name())) &#123;</span><br><span class="line">            ModuleDefine newInstance;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                newInstance = <span class="keyword">module</span>.getClass().newInstance();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InstantiationException | IllegalAccessException e) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> ModuleNotFoundException(e);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 准备阶段,将ModuleDefine与ModuleProvider关联并初始化，其中包含着ModuleProvider的prepare阶段</span></span><br><span class="line">            newInstance.prepare(<span class="keyword">this</span>, applicationConfiguration.getModuleConfiguration(moduleName), moduleProviderLoader);</span><br><span class="line">            loadedModules.put(moduleName, newInstance);</span><br><span class="line">            moduleList.remove(moduleName);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Finish prepare stage</span></span><br><span class="line">isInPrepareStage = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (moduleList.size() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> ModuleNotFoundException(moduleList.toString() + <span class="string">&quot; missing.&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 实例化即完成数据的初始化以及排序</span></span><br><span class="line">BootstrapFlow bootstrapFlow = <span class="keyword">new</span> BootstrapFlow(loadedModules);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 开始正式启动各个组件</span></span><br><span class="line">bootstrapFlow.start(<span class="keyword">this</span>);</span><br><span class="line"><span class="comment">// 初始化完成后的回调操作</span></span><br><span class="line">bootstrapFlow.notifyAfterCompleted();</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="3-本地代码调试踩坑"><a href="#3-本地代码调试踩坑" class="headerlink" title="3 本地代码调试踩坑"></a>3 本地代码调试踩坑</h2><h4 id="3-1-1-OAP初始化启动无问题，但停止ES后导致异常中断再次连接的时候UI显示异常，控制台报错"><a href="#3-1-1-OAP初始化启动无问题，但停止ES后导致异常中断再次连接的时候UI显示异常，控制台报错" class="headerlink" title="3.1.1 OAP初始化启动无问题，但停止ES后导致异常中断再次连接的时候UI显示异常，控制台报错"></a>3.1.1 OAP初始化启动无问题，但停止ES后导致异常中断再次连接的时候UI显示异常，控制台报错</h4><blockquote>
+<ul>
+<li>[SearchPhaseExecutionException<a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/30073759/searchphaseexecutionexceptionfailed-to-execute-phase-query-all-shards-failed">Failed to execute phase [query], all shards &gt;failed</a></li>
+<li><a target="_blank" rel="noopener" href="http://hanc.cc/index.php/archives/149/">elasticsearch出现SearchPhaseExecutionException的解决方案</a></li>
+</ul>
+</blockquote>
+<h4 id="3-1-2-自定义开发插件由于Linsence问题无法打Jar包"><a href="#3-1-2-自定义开发插件由于Linsence问题无法打Jar包" class="headerlink" title="3.1.2 自定义开发插件由于Linsence问题无法打Jar包"></a>3.1.2 自定义开发插件由于Linsence问题无法打Jar包</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mvn clean install -DskipTests -Drat.skip=true</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="友情链接"><a href="#友情链接" class="headerlink" title="友情链接"></a>友情链接</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/SkyAPM/document-cn-translation-of-skywalking">SkyWalking 文档中文版（社区提供）</a></li>
+<li><a target="_blank" rel="noopener" href="https://wu-sheng.gitbooks.io/opentracing-io/content/">opentracing文档中文版</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/av35990012/">Skywalking 6.X源码构建及运行</a></li>
+<li><a target="_blank" rel="noopener" href="https://skyapm.github.io/document-cn-translation-of-skywalking/zh/master/guides/Java-Plugin-Development-Guide.html">插件开发指南中文版</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.iocoder.cn/SkyWalking/agent-collect-trace/">SkyWalking 源码分析 —— Agent 收集 Trace 数据</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.iocoder.cn/SkyWalking/collector-init/">SkyWalking 源码分析 —— Collector 初始化</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.iocoder.cn/SkyWalking/trace-id-integrate-into-logs/">SkyWalking 源码分析 —— traceId集成到日志组件</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/SkyAPM/java-plugin-extensions">由于license问题其他的插件（Oracle）拓展仓库</a></li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Jarvis</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://taofangf.github.io/2021/12/24/SkyWalking%E7%AC%94%E8%AE%B0/">http://taofangf.github.io/2021/12/24/SkyWalking%E7%AC%94%E8%AE%B0/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://taofangf.github.io" target="_blank">Jarvis</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Jarvis</div><div class="author-info__description">念念不忘 必有回响</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">1</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/taofangf"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">期望带来失望的恶性循环</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Agent-Core%E6%A0%B8%E5%BF%83"><span class="toc-number">1.</span> <span class="toc-text">1 Agent-Core核心</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1%E5%85%B3%E9%94%AE%E6%8A%BD%E8%B1%A1%E7%B1%BBAbstractClassEnhancePluginDefine%E6%8F%92%E4%BB%B6%E6%A8%A1%E5%9D%97"><span class="toc-number">1.1.</span> <span class="toc-text">1.1关键抽象类AbstractClassEnhancePluginDefine插件模块</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%A2%9E%E5%BC%BA%E6%8F%92%E4%BB%B6"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 自定义增强插件</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-1-%E5%AE%9E%E7%8E%B0%E5%AF%B9%E7%B1%BB%E7%9A%84%E8%87%AA%E5%AE%9A%E4%B9%89%E5%A2%9E%E5%BC%BA%E9%9C%80%E8%A6%812%E6%AD%A5%E3%80%82"><span class="toc-number">1.2.1.</span> <span class="toc-text">1.2.1 实现对类的自定义增强需要2步。</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-2-%E6%BA%90%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.2.2.</span> <span class="toc-text">1.2.2 源码实现</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-2-2-1%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8F%92%E4%BB%B6%E7%9A%84%E5%8A%A0%E8%BD%BD%E6%96%B9%E5%BC%8F"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">1.2.2.1自定义插件的加载方式</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#1-2-2-2%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8F%92%E4%BB%B6%E7%B1%BB%E5%A2%9E%E5%BC%BA%E6%96%B9%E5%BC%8F"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">1.2.2.2自定义插件类增强方式</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-AbstractTracerContext%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AE%A1%E7%90%86%E6%8E%A5%E5%8F%A3"><span class="toc-number">1.3.</span> <span class="toc-text">1.3 AbstractTracerContext上下文管理接口</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-1-%E9%87%8D%E7%82%B9%E5%AE%9E%E7%8E%B0%E7%B1%BBorg-apache-skywalking-apm-agent-core-context-TracingContext"><span class="toc-number">1.3.1.</span> <span class="toc-text">1.3.1 重点实现类org.apache.skywalking.apm.agent.core.context.TracingContext</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-2-%E5%AE%9E%E7%8E%B0%E7%B1%BBorg-apache-skywalking-apm-agent-core-context-IgnoredTracerContext"><span class="toc-number">1.3.2.</span> <span class="toc-text">1.3.2 实现类org.apache.skywalking.apm.agent.core.context.IgnoredTracerContext</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Collector-%E8%A7%82%E6%B5%8B%E5%88%86%E6%9E%90%E5%B9%B3%E5%8F%B0-Observability-Analysis-Platform-OAP"><span class="toc-number">2.</span> <span class="toc-text">2 Collector 观测分析平台(Observability Analysis Platform, OAP)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-OAP%E7%9A%84%E5%90%AF%E5%8A%A8%E5%8F%8A%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 OAP的启动及初始化流程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-1-%E8%A1%A5%E5%85%85%E4%BF%A1%E6%81%AF-%E5%8C%85%E5%90%AB%E4%BD%86%E4%B8%8D%E9%99%90%E4%BA%8E%E4%BB%A5%E4%B8%8B%E5%9F%BA%E6%9C%AC%E5%AE%9E%E7%8E%B0%EF%BC%8C%E8%BF%98%E6%9C%89%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8B%93%E5%B1%95%E7%BB%84%E4%BB%B6"><span class="toc-number">2.1.1.</span> <span class="toc-text">2.1.1 补充信息(包含但不限于以下基本实现，还有自定义拓展组件)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-2-%E7%BB%84%E4%BB%B6%E7%AE%A1%E7%90%86ModuleManager"><span class="toc-number">2.1.2.</span> <span class="toc-text">2.1.2 组件管理ModuleManager</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%9C%AC%E5%9C%B0%E4%BB%A3%E7%A0%81%E8%B0%83%E8%AF%95%E8%B8%A9%E5%9D%91"><span class="toc-number">3.</span> <span class="toc-text">3 本地代码调试踩坑</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-1-OAP%E5%88%9D%E5%A7%8B%E5%8C%96%E5%90%AF%E5%8A%A8%E6%97%A0%E9%97%AE%E9%A2%98%EF%BC%8C%E4%BD%86%E5%81%9C%E6%AD%A2ES%E5%90%8E%E5%AF%BC%E8%87%B4%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD%E5%86%8D%E6%AC%A1%E8%BF%9E%E6%8E%A5%E7%9A%84%E6%97%B6%E5%80%99UI%E6%98%BE%E7%A4%BA%E5%BC%82%E5%B8%B8%EF%BC%8C%E6%8E%A7%E5%88%B6%E5%8F%B0%E6%8A%A5%E9%94%99"><span class="toc-number">3.0.1.</span> <span class="toc-text">3.1.1 OAP初始化启动无问题，但停止ES后导致异常中断再次连接的时候UI显示异常，控制台报错</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-2-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BC%80%E5%8F%91%E6%8F%92%E4%BB%B6%E7%94%B1%E4%BA%8ELinsence%E9%97%AE%E9%A2%98%E6%97%A0%E6%B3%95%E6%89%93Jar%E5%8C%85"><span class="toc-number">3.0.2.</span> <span class="toc-text">3.1.2 自定义开发插件由于Linsence问题无法打Jar包</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%8B%E6%83%85%E9%93%BE%E6%8E%A5"><span class="toc-number">3.1.</span> <span class="toc-text">友情链接</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/12/24/SkyWalking%E7%AC%94%E8%AE%B0/" title="SkyWalking笔记">SkyWalking笔记</a><time datetime="2021-12-24T13:28:08.857Z" title="发表于 2021-12-24 21:28:08">2021-12-24</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By Jarvis</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
